@@ -1,4 +1,4 @@
-package com.example.android.booklist6;
+package com.example.android.booklist8;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

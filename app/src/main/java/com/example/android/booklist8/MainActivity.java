@@ -1,5 +1,8 @@
-package com.example.android.booklist6;
+package com.example.android.booklist8;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -28,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText userInput;
     private Button SearchBtn;
     private String userBookSearch;
+    private TextView emptyTextView;
+    private int length;
 
 
     @Override
@@ -39,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
         userInput = (EditText) findViewById(R.id.editText);
         SearchBtn = (Button) findViewById(R.id.searchBtn);
 
+        //set empty state TextView
+        emptyTextView = (TextView)findViewById(R.id.text_empty_list);
+        bookListView.setEmptyView(emptyTextView);
+
         SearchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -48,16 +58,31 @@ public class MainActivity extends AppCompatActivity {
                 if (userBookSearch.trim().length() <= 0 || userBookSearch.length() <= 0) {
                     Toast.makeText(getApplicationContext(), "Type your search", Toast.LENGTH_LONG).show();
                 } else {
-                    BookAsyncTask task = new BookAsyncTask();
-                    task.execute();
+                    checkConnectivity();
                 }
             }
         });
-
     }
 
-    private class BookAsyncTask extends AsyncTask<URL, Void, ArrayList<Book>> {
+    /**chech the internet connection and execute BookAsyncTask  */
+    private void checkConnectivity() {
+        // Get a reference to the ConnectivityManager to check state of network connectivity
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        // Get details on the currently active default data network
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+
+        // If there is a network connection, fetch data
+        if (networkInfo != null && networkInfo.isConnected()) {
+            BookAsyncTask task = new BookAsyncTask();
+            task.execute();
+        } else
+        // Otherwise, display error
+        Toast.makeText(this,"sorry, NO INTERNET connectivity",Toast.LENGTH_LONG).show();
+    }
+
+
+    private class BookAsyncTask extends AsyncTask<URL, Void, ArrayList<Book>> {
         @Override
         protected ArrayList<Book> doInBackground(URL... urls) {
             URL url = null;
@@ -67,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 jsonResponce = makeHttpRequest(url);
             } catch (IOException e) {
-                //Log.e(LOG_TAG, "In DoInBackground Override Method: ",e);
+                // "In DoInBackground Override Method";
             }
 
             ArrayList<Book> books = extractBookFromJson(jsonResponce);
@@ -75,12 +100,11 @@ public class MainActivity extends AppCompatActivity {
             userBookSearch = "";
 
             return books;
-            //   return null;
+
         }
 
         @Override
         protected void onPostExecute(ArrayList<Book> books) {
-//            super.onPostExecute(books);
             if (books == null) {
                 return;
             }
@@ -122,14 +146,12 @@ public class MainActivity extends AppCompatActivity {
             urlConnection.connect();
 
             if (urlConnection.getResponseCode() == 200) {
-                //       Log.e(LOG_TAG, "Response code: "+urlConnection.getResponseCode());
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             } else {
-                //       Log.e(LOG_TAG,"Error Response Code: "+urlConnection.getResponseCode()+ "URl COnnection: "+url.toString());
             }
         } catch (IOException e) {
-            //     Log.e(LOG_TAG, "Error Retrieving Book JSON Results", e);
+
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -146,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private String readFromStream(InputStream inputStream) throws IOException {
         StringBuilder OutputString = new StringBuilder();
+
         if (inputStream != null) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader reader = new BufferedReader(inputStreamReader);
@@ -177,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < length; i++) {
                 String author = "Author: ";
                 String category = "";
-                // String publisher="Publisher: ";
                 double rating;
                 String urlJsonLink = "";
 
@@ -187,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
                 String picture = bookPictures.getString("thumbnail");
 
                 String title = bookInfo.getString("title");
-                // publisher += bookInfo.getString("publisher");
                 if (bookInfo.isNull("averageRating")) {
                     rating = 5;
                 } else {
@@ -195,13 +216,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 urlJsonLink = bookInfo.getString("previewLink");
 
-                JSONArray authorJson = bookInfo.getJSONArray("authors");
 
+                JSONArray authorJson = bookInfo.getJSONArray("authors");
+                /** if there is no author */
+
+
+                /** if there is more than one author*/
                 if (authorJson.length() > 0) {
                     for (int j = 0; j < authorJson.length(); j++) {
-                        author += authorJson.optString(j) + " ";
+                        author += authorJson.optString(j) + ", ";
                     }
                 }
+
+
 
                 JSONArray categories = bookInfo.getJSONArray("categories");
                 if (categories.length() > 0) {
@@ -217,12 +244,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * update UI
+     * #4 update UI
      */
     private void UpdateUi(ArrayList<Book> books) {
-        //ArrayList tempBookArrayList = books;
+
         ListView bookListView = (ListView) findViewById(R.id.list);
         BookAdapter adapter = new BookAdapter(this, books);
+
+        /** If there is no result, send a message */
+        if (books.isEmpty()){
+            Toast.makeText(this, "no result, Try it again", Toast.LENGTH_LONG).show();
+            emptyTextView.setText("No result found!");
+        }
+
         bookListView.setAdapter(adapter);
 
 

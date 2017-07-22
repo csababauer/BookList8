@@ -1,9 +1,8 @@
-package com.example.android.booklist6;
+package com.example.android.booklist8;
 
 /**
  * Created by Csaba on 11/07/2017.
  */
-
 public class Book {
 
     private double mRating;
@@ -22,27 +21,19 @@ public class Book {
         this.ProvidedUrl = url;
     }
 
-    public double getmRating() {
-
-        return mRating;
-    }
-
+    public double getmRating() {return mRating;}
     public String getPrividedUrl() {
         return ProvidedUrl;
     }
-
     public String getmTitle() {
         return mTitle;
     }
-
     public String getmAuthor() {
         return mAuthor;
     }
-
     public String getmCategory() {
         return mCategory;
     }
-
     public String getmPicture() {
         return mPicture;
     }
