@@ -21,22 +21,32 @@ public class Book {
         this.ProvidedUrl = url;
     }
 
-    public double getmRating() {return mRating;}
+    public double getmRating() {
+        return mRating;
+    }
+
     public String getPrividedUrl() {
         return ProvidedUrl;
     }
+
     public String getmTitle() {
         return mTitle;
     }
+
     public String getmAuthor() {
-        return mAuthor;
+        String authors = checkAuthors();
+        return authors;
     }
+
     public String getmCategory() {
         return mCategory;
     }
+
     public String getmPicture() {
         return mPicture;
     }
-}
 
+    /** if there is more authors */
+    public String checkAuthors() {return mAuthor;}
+}
 

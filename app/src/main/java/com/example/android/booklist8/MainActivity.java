@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             int length = bookArray.length();
 
             for (int i = 0; i < length; i++) {
-                String author = "Author: ";
+
                 String category = "";
                 double rating;
                 String urlJsonLink = "";
@@ -208,25 +208,55 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject bookPictures = bookInfo.getJSONObject("imageLinks");
                 String picture = bookPictures.getString("thumbnail");
 
-                String title = bookInfo.getString("title");
+                /** check the title */
+                String title;
+                if (bookInfo.has("title")) {
+                    title = bookInfo.getString("title");
+                } else {
+                    title = "No Title";
+                }
+
+                /** check rating */
                 if (bookInfo.isNull("averageRating")) {
-                    rating = 5;
+                    rating = 0;
                 } else {
                     rating = bookInfo.getDouble("averageRating");
                 }
+
                 urlJsonLink = bookInfo.getString("previewLink");
 
 
-                JSONArray authorJson = bookInfo.getJSONArray("authors");
-                /** if there is no author */
 
+                /** Fucking authors again*/
+                JSONArray authorsArray;
+                ArrayList<String> authors = new ArrayList<String>();
 
-                /** if there is more than one author*/
-                if (authorJson.length() > 0) {
-                    for (int j = 0; j < authorJson.length(); j++) {
-                        author += authorJson.optString(j) + ", ";
+                if (bookInfo.has("authors")) {
+                    authorsArray = bookInfo.getJSONArray("authors");
+                    for (int j = 0; j < authorsArray.length(); j++) {
+                        authors.add(authorsArray.getString(j));
                     }
+                } else {
+                    authors.add("Uknown Author");
                 }
+
+
+
+                /** check authors
+               String finalAuthor = "N/A";
+
+                if (bookInfo.has("authors")) {
+                    String author = "";
+                    JSONArray authorsArray = bookInfo.getJSONArray("authors");
+                    if (authorsArray.length() > 0) {
+                        for (int j = 0; j < authorsArray.length(); j++) {
+                            author += authorsArray.optString(j) + ", ";
+                        }
+                        finalAuthor = author;
+                    }else {
+                        finalAuthor = "Unknown Author";
+                }
+                }*/
 
 
 
@@ -236,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
                         category += categories.optString(j) + " ";
                     }
                 }
-                books.add(new Book(rating, title, author, category, picture, urlJsonLink));
+                books.add(new Book(rating, title, authors.toString(), category, picture, urlJsonLink));
             }
         } catch (JSONException e) {
         }
@@ -256,12 +286,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "no result, Try it again", Toast.LENGTH_LONG).show();
             emptyTextView.setText("No result found!");
         }
-
         bookListView.setAdapter(adapter);
-
-
     }
-
 }
 
 
