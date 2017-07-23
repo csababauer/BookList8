@@ -242,13 +242,16 @@ public class MainActivity extends AppCompatActivity {
                         authors.add("Uknown Author");
                     }
 
-
-                    JSONArray categories = bookInfo.getJSONArray("categories");
-                    if (categories.length() > 0) {
-                        for (int j = 0; j < categories.length(); j++) {
-                            category += categories.optString(j) + " ";
+                    /** check if there is any categories*/
+                    if (bookInfo.has("categories")) {
+                        JSONArray categories = bookInfo.getJSONArray("categories");
+                        if (categories.length() > 0) {
+                            for (int j = 0; j < categories.length(); j++) {
+                                category += categories.optString(j) + " ";
+                            }
                         }
                     }
+
                     books.add(new Book(rating, title, authors.toString(), category, picture, urlJsonLink));
                 }
             }
