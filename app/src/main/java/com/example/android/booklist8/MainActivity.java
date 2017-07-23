@@ -194,84 +194,69 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             JSONObject baseJsonObject = new JSONObject(bookJson);
-            JSONArray bookArray = baseJsonObject.getJSONArray("items");
-            int length = bookArray.length();
+            /** check if there is "item" in the JSONOnject*/
+            if (baseJsonObject.has("items")) {
 
-            for (int i = 0; i < length; i++) {
+                JSONArray bookArray = baseJsonObject.getJSONArray("items");
+                int length = bookArray.length();
 
-                String category = "";
-                double rating;
-                String urlJsonLink = "";
+                for (int i = 0; i < length; i++) {
 
-                JSONObject bookObject = bookArray.getJSONObject(i);
-                JSONObject bookInfo = bookObject.getJSONObject("volumeInfo");
-                JSONObject bookPictures = bookInfo.getJSONObject("imageLinks");
-                String picture = bookPictures.getString("thumbnail");
+                    String category = "";
+                    double rating;
+                    String urlJsonLink = "";
 
-                /** check the title */
-                String title;
-                if (bookInfo.has("title")) {
-                    title = bookInfo.getString("title");
-                } else {
-                    title = "No Title";
-                }
+                    JSONObject bookObject = bookArray.getJSONObject(i);
+                    JSONObject bookInfo = bookObject.getJSONObject("volumeInfo");
+                    JSONObject bookPictures = bookInfo.getJSONObject("imageLinks");
+                    String picture = bookPictures.getString("thumbnail");
 
-                /** check rating */
-                if (bookInfo.isNull("averageRating")) {
-                    rating = 0;
-                } else {
-                    rating = bookInfo.getDouble("averageRating");
-                }
-
-                urlJsonLink = bookInfo.getString("previewLink");
-
-
-
-                /** Fucking authors again*/
-                JSONArray authorsArray;
-                ArrayList<String> authors = new ArrayList<String>();
-
-                if (bookInfo.has("authors")) {
-                    authorsArray = bookInfo.getJSONArray("authors");
-                    for (int j = 0; j < authorsArray.length(); j++) {
-                        authors.add(authorsArray.getString(j));
+                    /** check the title */
+                    String title;
+                    if (bookInfo.has("title")) {
+                        title = bookInfo.getString("title");
+                    } else {
+                        title = "No Title";
                     }
-                } else {
-                    authors.add("Uknown Author");
-                }
+
+                    /** check rating */
+                    if (bookInfo.isNull("averageRating")) {
+                        rating = 0;
+                    } else {
+                        rating = bookInfo.getDouble("averageRating");
+                    }
+
+                    urlJsonLink = bookInfo.getString("previewLink");
 
 
+                    /** authors again*/
+                    JSONArray authorsArray;
+                    ArrayList<String> authors = new ArrayList<String>();
 
-                /** check authors
-               String finalAuthor = "N/A";
-
-                if (bookInfo.has("authors")) {
-                    String author = "";
-                    JSONArray authorsArray = bookInfo.getJSONArray("authors");
-                    if (authorsArray.length() > 0) {
+                    if (bookInfo.has("authors")) {
+                        authorsArray = bookInfo.getJSONArray("authors");
                         for (int j = 0; j < authorsArray.length(); j++) {
-                            author += authorsArray.optString(j) + ", ";
+                            authors.add(authorsArray.getString(j));
                         }
-                        finalAuthor = author;
-                    }else {
-                        finalAuthor = "Unknown Author";
-                }
-                }*/
-
-
-
-                JSONArray categories = bookInfo.getJSONArray("categories");
-                if (categories.length() > 0) {
-                    for (int j = 0; j < categories.length(); j++) {
-                        category += categories.optString(j) + " ";
+                    } else {
+                        authors.add("Uknown Author");
                     }
+
+
+                    JSONArray categories = bookInfo.getJSONArray("categories");
+                    if (categories.length() > 0) {
+                        for (int j = 0; j < categories.length(); j++) {
+                            category += categories.optString(j) + " ";
+                        }
+                    }
+                    books.add(new Book(rating, title, authors.toString(), category, picture, urlJsonLink));
                 }
-                books.add(new Book(rating, title, authors.toString(), category, picture, urlJsonLink));
             }
-        } catch (JSONException e) {
+            } catch(JSONException e){
+            }
+            return books;
         }
-        return books;
-    }
+
 
     /**
      * #4 update UI
